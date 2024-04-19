@@ -10,7 +10,7 @@ use ::oauth2::{
     basic::{BasicClient, BasicTokenResponse},
     reqwest::async_http_client,
     url::Url,
-    AuthUrl, AuthorizationCode, ClientId, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
+    AuthUrl, AuthorizationCode, ClientId,ClientSecret, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
     RedirectUrl, RefreshToken, Scope, TokenResponse, TokenUrl,
 };
 use async_trait::async_trait;
@@ -36,6 +36,8 @@ impl OAuth2Client {
             expires: expires(result.expires_in()),
             #[cfg(feature = "openid")]
             claims: None,
+            #[cfg(feature = "google")]
+            client_secret: None,
         })
     }
 }
@@ -47,16 +49,19 @@ impl Client for OAuth2Client {
     type LoginState = LoginState;
     type SessionState = ();
 
+    #[cfg(feature = "google")]
     async fn from_config(config: Self::Configuration) -> Result<Self, OAuth2Error> {
         let oauth2::Config {
             client_id,
             auth_url,
             token_url,
+            #[cfg(feature = "google")]
+            client_secret,
         } = config;
-
+        //let cs = "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".to_string();
         let client = BasicClient::new(
             ClientId::new(client_id),
-            None,
+            Some(ClientSecret::new(client_secret)),
             AuthUrl::new(auth_url)
                 .map_err(|err| OAuth2Error::Configuration(format!("invalid auth URL: {err}")))?,
             Some(
@@ -69,6 +74,31 @@ impl Client for OAuth2Client {
         Ok(Self { client })
     }
 
+    #[cfg(not(feature = "google"))]
+    async fn from_config(config: Self::Configuration) -> Result<Self, OAuth2Error> {
+        let oauth2::Config {
+            client_id,
+            auth_url,
+            token_url,
+        } = config;
+        let cs = "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".to_string();
+        let client_secet = ClientSecret::new(cs);
+        let client = BasicClient::new(
+            ClientId::new(client_id), 
+            Some(client_secet),
+            AuthUrl::new(auth_url)
+                .map_err(|err| OAuth2Error::Configuration(format!("invalid auth URL: {err}")))?,
+            Some(
+                TokenUrl::new(token_url).map_err(|err| {
+                    OAuth2Error::Configuration(format!("invalid token URL: {err}"))
+                })?,
+            ),
+        );
+
+        Ok(Self { client })
+    }
+    
+    
     fn set_redirect_uri(mut self, url: Url) -> Self {
         self.client = self.client.set_redirect_uri(RedirectUrl::from_url(url));
         self

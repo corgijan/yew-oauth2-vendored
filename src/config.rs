@@ -122,8 +122,12 @@ pub mod oauth2 {
         pub auth_url: String,
         /// The token exchange URL
         pub token_url: String,
+        /// The Optional client secret.
+        #[cfg(feature = "google")]
+        pub client_secret: String,
     }
 
+    #[cfg(not(feature = "google"))]
     impl Config {
         /// Create a new configuration
         pub fn new(
@@ -135,6 +139,23 @@ pub mod oauth2 {
                 client_id: client_id.into(),
                 auth_url: auth_url.into(),
                 token_url: token_url.into(),
+            }
+        }
+    }
+    #[cfg(feature = "google")]
+    impl Config {
+        /// Create a new configuration
+        pub fn new(
+            client_id: impl Into<String>,
+            auth_url: impl Into<String>,
+            token_url: impl Into<String>,
+            client_secret: impl Into<String>,
+        ) -> Self {
+            Self {
+                client_id: client_id.into(),
+                auth_url: auth_url.into(),
+                token_url: token_url.into(),
+                client_secret: client_secret.into(),
             }
         }
     }
