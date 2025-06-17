@@ -1,6 +1,14 @@
 # OAuth2 (and OIDC) component for Yew
 ### Disclaimer: This is a fork intended to support as many vendors as possible as out of the box solution
-Currently supported: Google OAuth2
+Currently supported: Google OAuth2 
+
+I will release it on crates.io as soon as I'm happy with the state:
+To get started with google - Add to your `Cargo.toml`:
+
+```toml
+yew-oauth2 = { git = "https://github.com/corgijan/yew-oauth2.git", features = ["google"], branch = "main" }
+```
+
 
 [![crates.io](https://img.shields.io/crates/v/yew-oauth2.svg)](https://crates.io/crates/yew-oauth2)
 [![docs.rs](https://docs.rs/yew-oauth2/badge.svg)](https://docs.rs/yew-oauth2)
