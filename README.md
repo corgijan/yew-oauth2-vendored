@@ -1,4 +1,4 @@
-# OAuth2 (and OIDC) component for Yew
+# OAuth2 (and OIDC) component for Yew with Google support
 ### Disclaimer: This is a fork intended to support as many vendors as possible as out of the box solution
 Currently supported: Google OAuth2 
 
