@@ -81,11 +81,9 @@ impl Client for OAuth2Client {
             auth_url,
             token_url,
         } = config;
-        let cs = "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".to_string();
-        let client_secet = ClientSecret::new(cs);
         let client = BasicClient::new(
-            ClientId::new(client_id), 
-            Some(client_secet),
+            ClientId::new(client_id),
+            None, // No client secret for non-Google OAuth2
             AuthUrl::new(auth_url)
                 .map_err(|err| OAuth2Error::Configuration(format!("invalid auth URL: {err}")))?,
             Some(
