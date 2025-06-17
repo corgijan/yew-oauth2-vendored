@@ -9,7 +9,7 @@ To get started with google - Add to your `Cargo.toml`:
 yew-oauth2 = { git = "https://github.com/corgijan/yew-oauth2.git", features = ["google"], branch = "main" }
 ```
 
-
+-- Copied Part from source 
 [![crates.io](https://img.shields.io/crates/v/yew-oauth2.svg)](https://crates.io/crates/yew-oauth2)
 [![docs.rs](https://docs.rs/yew-oauth2/badge.svg)](https://docs.rs/yew-oauth2)
 [![CI](https://github.com/ctron/yew-oauth2/actions/workflows/ci.yaml/badge.svg)](https://github.com/ctron/yew-oauth2/actions/workflows/ci.yaml)
