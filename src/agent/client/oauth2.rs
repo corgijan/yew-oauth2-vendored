@@ -118,11 +118,14 @@ impl Client for OAuth2Client {
 
         if let Some(audience) = &config.audience {
             req = req.add_extra_param("audience".to_string(), audience.clone());
+        }
+        if !&config.scopes.is_empty(){
             let mut scopes = String::new();
             for scope in &config.scopes {
-                scopes.push_str(&format!("https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&include_granted_scopes=true"));
+                scopes.push_str(&format!("{scope} "));
             }
             req = req.add_extra_param("scope".to_string(), scopes);
+            req = req.add_extra_param("include_granted_scopes".to_string(), "true".to_string());
         }
 
         let (url, state) = req.url();
