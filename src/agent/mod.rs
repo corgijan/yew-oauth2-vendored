@@ -26,6 +26,7 @@ use std::{cmp::min, collections::HashMap, fmt::Debug, time::Duration};
 use std::fmt::format;
 use std::mem::forget;
 use std::str::FromStr;
+use gloo::console::log;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -169,6 +170,7 @@ impl LogoutOptions {
 }
 
 #[doc(hidden)]
+#[derive(Debug, Clone)]
 pub enum Msg<C>
 where
     C: Client,
@@ -285,6 +287,7 @@ where
 
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
         gloo::console::log!("update state: {state:?}");
+        
         if let OAuth2Context::Authenticated(Authentication {
             expires: Some(expires),
             ..
@@ -413,7 +416,8 @@ where
     /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-
+        gloo::console::log!("detecting state");
+    
         let state = if let Some(state) = Self::find_query_state() {
             #[cfg(feature = "google")]
             {
@@ -633,13 +637,18 @@ where
     }
 
     fn start_login(&mut self, options: Option<LoginOptions>) -> Result<(), OAuth2Error> {
+        gloo::console::log!("Starting login");
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
+        log!("client:");
         let config = self.config.as_ref().ok_or(OAuth2Error::NotInitialized)?;
 
+        log!("conf");
         let options =
             options.unwrap_or_else(|| config.default_login_options.clone().unwrap_or_default());
+        log!("opts");
 
         let current_url = Self::current_url().map_err(OAuth2Error::StartLogin)?;
+        log!("urls");
 
         // take the parameter value first, then the agent configured value, then fall back to the default
         let redirect_url = options
@@ -671,6 +680,7 @@ where
         let mut login_url = login_context.url;
 
         login_url.query_pairs_mut().extend_pairs(options.query);
+        log!("request URL");
 
         // the next call will most likely navigate away from this page
 
