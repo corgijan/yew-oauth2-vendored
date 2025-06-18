@@ -179,6 +179,7 @@ impl Client for OAuth2Client {
         })
     }
 
+    #[cfg(not(feature = "google"))]
     async fn exchange_code(
         &self,
         code: String,

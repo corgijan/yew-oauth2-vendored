@@ -294,6 +294,7 @@ where
                 .unwrap_or_default();
 
             let mut expires = *expires;
+            gloo::console::log!(format!("Token expires in: {}s", expires));
             if let Some(max) = self.config.as_ref().and_then(|cfg| cfg.max_expiration) {
                 // cap time the token expires by "max"
                 expires = min(expires, max.as_secs());
@@ -422,7 +423,7 @@ where
                     }
                 );
                 //self.state = context;
-                self.update_state(context.clone(), None);
+                self.update_state(context.clone(),None);
                 Self::cleanup_url();
                 return Ok(true);
                 if let Some(error) = state.error {
