@@ -269,7 +269,7 @@ where
     }
 
     async fn process(&mut self, msg: Msg<C>) {
-        gloo::console::log!("Agent received message");
+        gloo::console::log!(format!("Processing message: {:?}", msg));
         match msg {
             Msg::Configure(config) => self.configure(config).await,
             Msg::StartLogin(login) => {
