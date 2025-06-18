@@ -310,7 +310,7 @@ where
             gloo::console::log!(format!("exp time: {} seconds", exp-grace.as_secs_f64()));
             #[cfg(feature = "google")]
             let diff = exp - grace.as_secs_f64();
-            #[cfg(not(feature = "google")]
+            #[cfg(not(feature = "google"))]
             let diff = exp - now -grace.as_secs_f64();
             gloo::console::log!(format!("Token diff: {} seconds", diff));
 
