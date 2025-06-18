@@ -405,7 +405,9 @@ where
 
         let state = if let Some(state) = Self::find_query_state() {
             #[cfg(feature = "google")]
-            {
+            {   
+                //log to console 
+                gloo::console::log!(format!("Found state: {:?}", state));
                 if state.access_token.is_none() {
                     return Err(OAuth2Error::LoginResult(
                         format!("Missing access token in query: {:?}", state)
@@ -421,6 +423,7 @@ where
                 );
                 //self.state = context;
                 self.update_state(context.clone(), None);
+                Self::cleanup_url();
                 return Ok(true);
                 if let Some(error) = state.error {
                     log::info!("Login error from server: {error}");
@@ -437,7 +440,7 @@ where
             return Ok(false);
         };
         #[cfg(feature = "google")]
-        return Ok(false);
+        return Ok(true);
 
 
         #[cfg(not(feature = "google"))]
@@ -573,6 +576,8 @@ where
             let query: HashMap<_, _> = new_url.query_pairs().collect();
             #[cfg(not(feature = "google"))]
             let query: HashMap<_, _> = url.query_pairs().collect();
+
+            gloo::console::log!(format!("Token: {:?}",query.get("access_token").map(ToString::to_string), ));
 
             Some(State {
                 #[cfg(not(feature = "google"))]
