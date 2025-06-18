@@ -407,7 +407,7 @@ where
             {
                 if state.access_token.is_none() {
                     return Err(OAuth2Error::LoginResult(
-                        "Missing access token in query".to_string(),
+                        format!("Missing access token in query: {:?}", state)
                     ));
                 }
                 let context = OAuth2Context::Authenticated(
