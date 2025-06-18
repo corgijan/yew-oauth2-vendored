@@ -63,7 +63,7 @@ impl Client for OAuth2Client {
             AuthUrl::new(auth_url)
                 .map_err(|err| OAuth2Error::Configuration(format!("invalid auth URL: {err}")))?,
             Some(
-                TokenUrl::new("dummy-url".into()).map_err(|err| {
+                TokenUrl::new("https://example.com/dummy/token".into()).map_err(|err| {
                     OAuth2Error::Configuration(format!("invalid token URL: {err}"))
                 })?,
             ),
