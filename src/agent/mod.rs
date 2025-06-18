@@ -584,7 +584,7 @@ where
                 #[cfg(feature = "google")]
                 expires_in: query.get("expires_in").map(|x| x.parse::<u64>().unwrap_or(0)),
                 state: query.get("state").map(ToString::to_string),
-                error: Option::from(url.to_string()),
+                error: query.get("error").map(ToString::to_string),
             })
         } else {
             None
