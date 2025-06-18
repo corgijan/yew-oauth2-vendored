@@ -23,6 +23,7 @@ use num_traits::cast::ToPrimitive;
 use reqwest::Url;
 use state::*;
 use std::{cmp::min, collections::HashMap, fmt::Debug, time::Duration};
+use std::str::FromStr;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -564,7 +565,11 @@ where
     /// Extract the state from the query.
     fn find_query_state() -> Option<State> {
         if let Ok(url) = Self::current_url() {
-            
+            #[cfg(feature = "google")]
+            let new_url = Url::from_str(&url.clone().to_string().replace("#", "?")).unwrap();
+            #[cfg(feature = "google")]
+            let query: HashMap<_, _> = new_url.query_pairs().collect();
+            #[cfg(not(feature = "google"))]
             let query: HashMap<_, _> = url.query_pairs().collect();
 
             Some(State {
