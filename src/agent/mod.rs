@@ -304,9 +304,11 @@ where
             }
 
             // get now as seconds
-            let now = Date::now() / 1000f64;
+            let now = Date::now() / 1000_f64;
             // get delta from now to expiration minus the grace period
-            let diff = expires as f64 - now - grace.as_secs_f64();
+            let exp: f64 = expires as f64;
+            gloo::console::log!(format!("exp time: {} seconds", exp-grace.as_secs_f64()));
+            let diff = exp - now - grace.as_secs_f64();
             gloo::console::log!(format!("Token diff: {} seconds", diff));
 
             let tx = self.tx.clone();
