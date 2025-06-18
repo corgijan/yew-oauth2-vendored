@@ -280,7 +280,7 @@ where
     }
 
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
-        log::debug!("update state: {state:?}");
+        gloo::console::log!("update state: {state:?}");
 
         if let OAuth2Context::Authenticated(Authentication {
             expires: Some(expires),
