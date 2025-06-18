@@ -421,6 +421,7 @@ where
                 );
                 //self.state = context;
                 self.update_state(context.clone(), None);
+                return Ok(true);
                 if let Some(error) = state.error {
                     log::info!("Login error from server: {error}");
 
