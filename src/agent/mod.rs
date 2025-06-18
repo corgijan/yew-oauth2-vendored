@@ -341,7 +341,7 @@ where
 
                 if matches!(self.state, OAuth2Context::NotInitialized) {
                     let detected = self.detect_state().await;
-                    log::debug!("Detected state: {detected:?}");
+                    gloo::console::log!(format!("Detected state: {:?}", detected));
                     match detected {
                         Ok(true) => {
                             if let Err(e) = self.post_login_redirect() {
@@ -405,8 +405,8 @@ where
 
         let state = if let Some(state) = Self::find_query_state() {
             #[cfg(feature = "google")]
-            {   
-                //log to console 
+            {
+                //log to console
                 gloo::console::log!(format!("Found state: {:?}", state));
                 if state.access_token.is_none() {
                     return Err(OAuth2Error::LoginResult(
