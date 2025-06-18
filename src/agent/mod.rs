@@ -276,6 +276,7 @@ where
                     // FIXME: need to report this somehow
                     log::info!("Failed to start login: {err}");
                 }
+                gloo::console::log!(format!("Start login with options: "));
             }
             Msg::Logout(logout) => self.logout_opts(logout),
             Msg::Refresh => self.refresh().await,
