@@ -118,6 +118,9 @@ impl Client for OAuth2Client {
 
         if let Some(audience) = &config.audience {
             req = req.add_extra_param("audience".to_string(), audience.clone())
+            for scope in &config.scopes {
+                req = req.add_scope(Scope::new(scope.to_string()));
+            }
         }
 
         let (url, state) = req.url();
