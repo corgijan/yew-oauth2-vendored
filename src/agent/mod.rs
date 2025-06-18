@@ -288,6 +288,7 @@ where
             ..
         }) = &state
         {
+            gloo::console::log!(format!("Token expires in: {expires} seconds"));
             let grace = self
                 .config
                 .as_ref()
@@ -304,15 +305,18 @@ where
             let now = Date::now() / 1000_f64;
             // get delta from now to expiration minus the grace period
             let exp: f64 = expires as f64;
+            gloo::console::log!(format!("exp time: {} seconds", exp-grace.as_secs_f64()));
             #[cfg(feature = "google")]
             let diff = exp - grace.as_secs_f64();
             #[cfg(not(feature = "google"))]
             let diff = exp - now -grace.as_secs_f64();
+            gloo::console::log!(format!("Token diff: {} seconds", diff));
 
             let tx = self.tx.clone();
             if diff > 0f64 {
                 // while the API says millis is u32, internally it is i32
                 let millis = (diff * 1000f64).to_i32().unwrap_or(i32::MAX);
+                gloo::console::log!(format!("Starting timeout for: {}ms", millis));
                 self.timeout = Some(Timeout::new(millis as u32, move || {
                     let _ = tx.try_send(Msg::Refresh);
                 }));
@@ -323,6 +327,8 @@ where
         } else {
             self.timeout = None;
         }
+        gloo::console::log!(format!("State changed: {:?}", self.timeout));
+        gloo::console::log!("notify state");
         self.notify_state(state.clone());
 
         self.state = state;
@@ -344,6 +350,7 @@ where
 
                 if matches!(self.state, OAuth2Context::NotInitialized) {
                     let detected = self.detect_state().await;
+                    gloo::console::log!(format!("Detected state: {:?}", detected));
                     match detected {
                         Ok(true) => {
                             if let Err(e) = self.post_login_redirect() {
@@ -404,11 +411,12 @@ where
     /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-        
+
         let state = if let Some(state) = Self::find_query_state() {
             #[cfg(feature = "google")]
             {
                 //log to console
+                gloo::console::log!(format!("Found state: {:?}", state));
                 if state.access_token.is_none() {
                     return Err(OAuth2Error::LoginResult(
                         format!("Missing access token in query: {:?}", state)
@@ -435,7 +443,7 @@ where
                     // error from the OAuth2 server
                     return Err(OAuth2Error::LoginResult(error));
                 }
-            }
+            };
         } else {
             // unable to get location and query
             return Ok(false);
@@ -577,6 +585,8 @@ where
             let query: HashMap<_, _> = new_url.query_pairs().collect();
             #[cfg(not(feature = "google"))]
             let query: HashMap<_, _> = url.query_pairs().collect();
+
+            gloo::console::log!(format!("Token: {:?}",query.get("access_token").map(ToString::to_string), ));
 
             Some(State {
                 #[cfg(not(feature = "google"))]
