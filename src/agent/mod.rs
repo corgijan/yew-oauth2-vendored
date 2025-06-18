@@ -23,6 +23,7 @@ use num_traits::cast::ToPrimitive;
 use reqwest::Url;
 use state::*;
 use std::{cmp::min, collections::HashMap, fmt::Debug, time::Duration};
+use std::fmt::format;
 use std::mem::forget;
 use std::str::FromStr;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
@@ -306,6 +307,7 @@ where
             let now = Date::now() / 1000f64;
             // get delta from now to expiration minus the grace period
             let diff = expires as f64 - now - grace.as_secs_f64();
+            gloo::console::log!(format!("Token diff: {} seconds", diff);
 
             let tx = self.tx.clone();
             if diff > 0f64 {
@@ -322,7 +324,7 @@ where
         } else {
             self.timeout = None;
         }
-
+        gloo::console::log!(format!("State changed: {:?}", self.timeout));
         gloo::console::log!("notify state");
         self.notify_state(state.clone());
 
