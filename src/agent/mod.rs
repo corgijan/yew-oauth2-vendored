@@ -277,7 +277,7 @@ where
             Msg::StartLogin(login) => {
                 if let Err(err) = self.start_login(login) {
                     // FIXME: need to report this somehow
-                    gloo::console::log!("Error starting login: {:?}", err);
+                    gloo::console::log!(format!("Error starting login: {:?}",err));
                 }
             }
             Msg::Logout(logout) => self.logout_opts(logout),
