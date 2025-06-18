@@ -117,10 +117,12 @@ impl Client for OAuth2Client {
             .use_implicit_flow();
 
         if let Some(audience) = &config.audience {
-            req = req.add_extra_param("audience".to_string(), audience.clone())
+            req = req.add_extra_param("audience".to_string(), audience.clone());
+            let mut scopes = String::new();
             for scope in &config.scopes {
-                req = req.add_scope(Scope::new(scope.to_string()));
+                scopes.push_str(&format!("https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&include_granted_scopes=true"));
             }
+            req = req.add_extra_param("scope".to_string(), scopes);
         }
 
         let (url, state) = req.url();
