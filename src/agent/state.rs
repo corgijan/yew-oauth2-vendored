@@ -10,7 +10,16 @@ pub(crate) const STORAGE_KEY_POST_LOGIN_URL: &str = "ctron/oauth2/postLoginUrl";
 
 #[derive(Debug)]
 pub(crate) struct State {
+    #[cfg(not(feature = "google"))]
     pub code: Option<String>,
+    #[cfg(feature = "google")]
+    pub access_token: Option<String>,
+    #[cfg(feature = "google")]
+    pub expires_in: Option<u64>,
+    #[cfg(feature = "google")]
+    pub scope: Option<String>,
+    #[cfg(feature = "google")]
+    pub refresh_token: Option<String>,
     pub state: Option<String>,
     pub error: Option<String>,
 }

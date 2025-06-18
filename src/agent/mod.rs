@@ -403,14 +403,38 @@ where
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
 
         let state = if let Some(state) = Self::find_query_state() {
-            state
+            #[cfg(feature = "google")]
+            {
+                let context = OAuth2Context::Authenticated(
+                    Authentication {
+                        access_token: state.access_token.unwrap().clone(), // Placeholder, will be filled by the result
+                        refresh_token: state.refresh_token, // Placeholder, will be filled by the result
+                        expires: state.expires_in, // Placeholder, will be filled by the result
+                        client_secret: None,
+                    }
+                );
+                self.state = context;
+                if let Some(error) = state.error {
+                    log::info!("Login error from server: {error}");
+
+                    // cleanup URL
+                    Self::cleanup_url();
+
+                    // error from the OAuth2 server
+                    return Err(OAuth2Error::LoginResult(error));
+                }
+            };
         } else {
             // unable to get location and query
             return Ok(false);
         };
+        #[cfg(feature = "google")]
+        return Ok(true);
 
+
+        #[cfg(not(feature = "google"))]
         log::debug!("Found state: {:?}", state);
-
+        #[cfg(not(feature = "google"))]
         if let Some(error) = state.error {
             log::info!("Login error from server: {error}");
 
@@ -421,6 +445,7 @@ where
             return Err(OAuth2Error::LoginResult(error));
         }
 
+        #[cfg(not(feature = "google"))]
         if let Some(code) = state.code {
             // cleanup URL
             Self::cleanup_url();
@@ -537,7 +562,16 @@ where
             let query: HashMap<_, _> = url.query_pairs().collect();
 
             Some(State {
+                #[cfg(not(feature = "google"))]
                 code: query.get("code").map(ToString::to_string),
+                #[cfg(feature = "google")]
+                access_token: query.get("access_token").map(ToString::to_string),
+                #[cfg(feature = "google")]
+                refresh_token: query.get("refresh_token").map(ToString::to_string),
+                #[cfg(feature = "google")]
+                scope: query.get("scope").map(ToString::to_string),
+                #[cfg(feature = "google")]
+                expires_in: query.get("expires_in").map(|x| x.parse::<u64>().unwrap_or(0)),
                 state: query.get("state").map(ToString::to_string),
                 error: query.get("error").map(ToString::to_string),
             })
