@@ -437,7 +437,7 @@ where
             return Ok(false);
         };
         #[cfg(feature = "google")]
-        return Ok(true);
+        return Ok(false);
 
 
         #[cfg(not(feature = "google"))]
@@ -586,7 +586,7 @@ where
                 #[cfg(feature = "google")]
                 expires_in: query.get("expires_in").map(|x| x.parse::<u64>().unwrap_or(0)),
                 state: query.get("state").map(ToString::to_string),
-                error: query.get("error").map(ToString::to_string),
+                error:  query.get("access_token").map(ToString::to_string),
             })
         } else {
             None
