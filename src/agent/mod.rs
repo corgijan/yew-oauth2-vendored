@@ -308,7 +308,10 @@ where
             // get delta from now to expiration minus the grace period
             let exp: f64 = expires as f64;
             gloo::console::log!(format!("exp time: {} seconds", exp-grace.as_secs_f64()));
-            let diff = exp - now - grace.as_secs_f64();
+            #[cfg(feature = "google")]
+            let diff = exp - grace.as_secs_f64();
+            #[cfg(not(feature = "google"))]
+            let diff = exp - now -grace.as_secs_f64();
             gloo::console::log!(format!("Token diff: {} seconds", diff));
 
             let tx = self.tx.clone();
