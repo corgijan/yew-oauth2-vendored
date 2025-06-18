@@ -178,6 +178,14 @@ impl Client for OAuth2Client {
             },
         })
     }
+    #[cfg(feature = "google")]
+    async fn exchange_code(
+        &self,
+        code: String,
+        LoginState { pkce_verifier }: LoginState,
+    ) -> Result<(OAuth2Context, Self::SessionState), OAuth2Error> {
+        unimplemented!()
+    }
 
     #[cfg(not(feature = "google"))]
     async fn exchange_code(
