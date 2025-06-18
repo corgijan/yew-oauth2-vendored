@@ -405,6 +405,11 @@ where
         let state = if let Some(state) = Self::find_query_state() {
             #[cfg(feature = "google")]
             {
+                if state.access_token.is_none() {
+                    return Err(OAuth2Error::LoginResult(
+                        "Missing access token in query".to_string(),
+                    ));
+                }
                 let context = OAuth2Context::Authenticated(
                     Authentication {
                         access_token: state.access_token.unwrap().clone(), // Placeholder, will be filled by the result
