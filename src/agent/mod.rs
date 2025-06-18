@@ -23,6 +23,7 @@ use num_traits::cast::ToPrimitive;
 use reqwest::Url;
 use state::*;
 use std::{cmp::min, collections::HashMap, fmt::Debug, time::Duration};
+use std::mem::forget;
 use std::str::FromStr;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use wasm_bindgen::JsValue;
@@ -259,6 +260,7 @@ where
                 Some(msg) => self.process(msg).await,
                 None => {
                     log::debug!("Agent channel closed");
+                    gloo::console::log!("Agent channel closed");
                     break;
                 }
             }
@@ -266,6 +268,7 @@ where
     }
 
     async fn process(&mut self, msg: Msg<C>) {
+        gloo::console::log!("Agent received message");
         match msg {
             Msg::Configure(config) => self.configure(config).await,
             Msg::StartLogin(login) => {
@@ -287,6 +290,7 @@ where
             ..
         }) = &state
         {
+            gloo::console::log!(format!("Token expires in: {expires} seconds"));
             let grace = self
                 .config
                 .as_ref()
@@ -320,6 +324,7 @@ where
             self.timeout = None;
         }
 
+        gloo::console::log!("notify state");
         self.notify_state(state.clone());
 
         self.state = state;
