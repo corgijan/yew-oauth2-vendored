@@ -284,7 +284,7 @@ where
 
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
         gloo::console::log!("update state: {state:?}");
-
+        #[cfg(not(feature = "google"))]
         if let OAuth2Context::Authenticated(Authentication {
             expires: Some(expires),
             ..
