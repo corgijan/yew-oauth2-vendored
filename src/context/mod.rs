@@ -26,7 +26,7 @@ pub struct Authentication {
     /// optional client secret for Google OAuth2
     #[cfg(feature = "google")]
     pub client_secret: Option<String>,
-    /// Expiration timestamp in seconds
+    /// Expiration timestamp in second
     pub expires: Option<u64>,
 }
 

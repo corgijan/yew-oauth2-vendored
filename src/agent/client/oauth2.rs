@@ -58,7 +58,6 @@ impl Client for OAuth2Client {
             #[cfg(feature = "google")]
             client_secret,
         } = config;
-        //let cs = "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".to_string();
         let client = BasicClient::new(
             ClientId::new(client_id),
             Some(ClientSecret::new(client_secret)),
@@ -95,13 +94,44 @@ impl Client for OAuth2Client {
 
         Ok(Self { client })
     }
-    
-    
+
+
     fn set_redirect_uri(mut self, url: Url) -> Self {
         self.client = self.client.set_redirect_uri(RedirectUrl::from_url(url));
         self
     }
 
+    #[cfg(feature = "google")]
+    fn make_login_context(
+        &self,
+        config: &InnerConfig,
+        redirect_url: Url,
+    ) -> Result<LoginContext<Self::LoginState>, OAuth2Error> {
+        let client = self
+            .client
+            .clone()
+            .set_redirect_uri(RedirectUrl::from_url(redirect_url));
+
+        let mut  req = client
+            .authorize_url(CsrfToken::new_random)
+            .use_implicit_flow();
+
+        if let Some(audience) = &config.audience {
+            req = req.add_extra_param("audience".to_string(), audience.clone())
+        }
+
+        let (url, state) = req.url();
+
+        Ok(LoginContext {
+            url,
+            csrf_token: state.secret().clone(),
+            state: LoginState {
+                pkce_verifier: "Nothing - Implicit-Flow".to_string(),
+            },
+        })
+    }
+
+    #[cfg(not(feature = "google"))]
     fn make_login_context(
         &self,
         config: &InnerConfig,
