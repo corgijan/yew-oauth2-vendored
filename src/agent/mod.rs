@@ -261,6 +261,7 @@ where
                 Some(msg) => self.process(msg).await,
                 None => {
                     log::debug!("Agent channel closed");
+                    gloo::console::log!("Agent channel closed");
                     break;
                 }
             }
@@ -276,7 +277,6 @@ where
                     // FIXME: need to report this somehow
                     log::info!("Failed to start login: {err}");
                 }
-                gloo::console::log!(format!("Start login with options: "));
             }
             Msg::Logout(logout) => self.logout_opts(logout),
             Msg::Refresh => self.refresh().await,
@@ -284,6 +284,7 @@ where
     }
 
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
+        gloo::console::log!("update state: {state:?}");
         if let OAuth2Context::Authenticated(Authentication {
             expires: Some(expires),
             ..
@@ -309,7 +310,7 @@ where
             gloo::console::log!(format!("exp time: {} seconds", exp-grace.as_secs_f64()));
             #[cfg(feature = "google")]
             let diff = exp - grace.as_secs_f64();
-            #[cfg(not(feature = "google"))]
+            #[cfg(not(feature = "google")]
             let diff = exp - now -grace.as_secs_f64();
             gloo::console::log!(format!("Token diff: {} seconds", diff));
 
@@ -544,6 +545,7 @@ where
     }
 
     async fn refresh(&mut self) {
+        gloo::console::log!("REFRESHING TOKEN");
         let (client, session_state) =
             if let (Some(client), Some(session_state)) = (&self.client, &self.session_state) {
                 (client.clone(), session_state.clone())
