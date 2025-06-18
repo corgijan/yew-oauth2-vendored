@@ -284,7 +284,6 @@ where
 
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
         gloo::console::log!("update state: {state:?}");
-        #[cfg(not(feature = "google"))]
         if let OAuth2Context::Authenticated(Authentication {
             expires: Some(expires),
             ..
@@ -312,7 +311,7 @@ where
             if diff > 0f64 {
                 // while the API says millis is u32, internally it is i32
                 let millis = (diff * 1000f64).to_i32().unwrap_or(i32::MAX);
-                log::debug!("Starting timeout for: {}ms", millis);
+                gloo::console::log!(format!("Starting timeout for: {}ms", millis));
                 self.timeout = Some(Timeout::new(millis as u32, move || {
                     let _ = tx.try_send(Msg::Refresh);
                 }));
@@ -539,6 +538,7 @@ where
     }
 
     async fn refresh(&mut self) {
+        gloo::console::log!("REFRESHING TOKEN");
         let (client, session_state) =
             if let (Some(client), Some(session_state)) = (&self.client, &self.session_state) {
                 (client.clone(), session_state.clone())
