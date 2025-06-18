@@ -17,13 +17,14 @@ use crate::context::{Authentication, OAuth2Context, Reason};
 use gloo_storage::{SessionStorage, Storage};
 use gloo_timers::callback::Timeout;
 use gloo_utils::{history, window};
-use gloo;
 use js_sys::Date;
 use log::error;
 use num_traits::cast::ToPrimitive;
 use reqwest::Url;
 use state::*;
 use std::{cmp::min, collections::HashMap, fmt::Debug, time::Duration};
+use std::fmt::format;
+use std::mem::forget;
 use std::str::FromStr;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use wasm_bindgen::JsValue;
@@ -403,18 +404,9 @@ where
     /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-
-        #[cfg(not(feature = "google"))]
+        
         let state = if let Some(state) = Self::find_query_state() {
-            state
-        } else {
-            // unable to get location and query
-            log::debug!("No state found in query");
-            return Ok(false);
-        };
-
-        #[cfg(feature = "google")]
-        let state = if let Some(state) = Self::find_query_state() {
+            #[cfg(feature = "google")]
             {
                 //log to console
                 if state.access_token.is_none() {
