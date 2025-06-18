@@ -419,7 +419,8 @@ where
                         client_secret: None,
                     }
                 );
-                self.state = context;
+                //self.state = context;
+                self.update_state(context.clone(), None);
                 if let Some(error) = state.error {
                     log::info!("Login error from server: {error}");
 
