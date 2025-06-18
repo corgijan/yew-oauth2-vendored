@@ -16,7 +16,6 @@ use ::oauth2::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use gloo_storage::SessionStorage;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LoginState {
@@ -56,7 +55,6 @@ impl Client for OAuth2Client {
             client_id,
             auth_url,
             token_url,
-            #[cfg(feature = "google")]
             client_secret,
         } = config;
         let client = BasicClient::new(
@@ -65,7 +63,7 @@ impl Client for OAuth2Client {
             AuthUrl::new(auth_url)
                 .map_err(|err| OAuth2Error::Configuration(format!("invalid auth URL: {err}")))?,
             Some(
-                TokenUrl::new(token_url).map_err(|err| {
+                TokenUrl::new("dummy-url".into()).map_err(|err| {
                     OAuth2Error::Configuration(format!("invalid token URL: {err}"))
                 })?,
             ),
