@@ -41,7 +41,7 @@ default = ["google"]
 # Enable for OpenID Connect support
 openid = ["openidconnect"]
 # Enable for Google OAuth2 support
-google = []
+google = ["relative-timestamp"]
 relative-timestamp = []
 
 [package.metadata.docs.rs]
