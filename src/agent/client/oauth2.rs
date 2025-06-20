@@ -54,6 +54,7 @@ impl Client for OAuth2Client {
         let oauth2::Config {
             client_id,
             auth_url,
+            #[cfg(not(feature = "google"))]
             token_url,
             client_secret,
         } = config;

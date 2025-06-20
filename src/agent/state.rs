@@ -18,7 +18,6 @@ pub(crate) struct State {
     pub expires_in: Option<u64>,
     #[cfg(feature = "google")]
     pub scope: Option<String>,
-    #[cfg(feature = "google")]
     pub refresh_token: Option<String>,
     pub state: Option<String>,
     pub error: Option<String>,

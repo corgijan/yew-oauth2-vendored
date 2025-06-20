@@ -410,57 +410,52 @@ where
         Ok((client, inner))
     }
 
-    /// When initializing, try to detect the state from the URL and session state.
-    ///
-    /// Returns `false` if there is no authentication state found and the result is final.
-    /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
-    async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
-        let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-        gloo::console::log!("detecting state");
-    
-        let state = if let Some(state) = Self::find_query_state() {
-            #[cfg(feature = "google")]
-            {
-                //log to console
-                gloo::console::log!(format!("Found state: {:?}", state));
-                if state.access_token.is_none() {
-                    return Err(OAuth2Error::LoginResult(
-                        format!("Missing access token in query: {:?}", state)
-                    ));
+
+
+    #[cfg(feature = "google")]
+    async fn extract_state_from_flow(&mut self, state: Option<State>,client: &C) -> Result<bool, OAuth2Error> {
+            let state = if let Some(state) = Self::find_query_state() {
+            //log to console
+            gloo::console::log!(format!("Found state: {:?}", state));
+            if state.access_token.is_none() {
+                return Err(OAuth2Error::LoginResult(
+                    format!("Missing access token in query: {:?}", state)
+                ));
+            }
+            let context = OAuth2Context::Authenticated(
+                Authentication {
+                    access_token: state.access_token.unwrap().clone(), // Placeholder, will be filled by the result
+                    refresh_token: state.refresh_token, // Placeholder, will be filled by the result
+                    expires: state.expires_in, // Placeholder, will be filled by the result
+                    client_secret: None,
                 }
-                let context = OAuth2Context::Authenticated(
-                    Authentication {
-                        access_token: state.access_token.unwrap().clone(), // Placeholder, will be filled by the result
-                        refresh_token: state.refresh_token, // Placeholder, will be filled by the result
-                        expires: state.expires_in, // Placeholder, will be filled by the result
-                        client_secret: None,
-                    }
-                );
-                //self.state = context;
-                self.update_state(context.clone(),None);
+            );
+            self.update_state(context.clone(),None);
+            Self::cleanup_url();
+            if let Some(error) = state.error {
+                gloo::console::log!(format!("Encountered ERROR: {:?}", error));
+                // cleanup URL
                 Self::cleanup_url();
-                return Ok(true);
-                if let Some(error) = state.error {
-                    log::info!("Login error from server: {error}");
-
-                    // cleanup URL
-                    Self::cleanup_url();
-
-                    // error from the OAuth2 server
-                    return Err(OAuth2Error::LoginResult(error));
-                }
+                // error from the OAuth2 server
+                return Err(OAuth2Error::LoginResult(error));
             };
-        } else {
+                return Ok(true);
+            } else {
+                // unable to get location and query
+                return Ok(false);
+            };
+    }
+
+    #[cfg(not(feature = "google"))]
+    async fn extract_state_from_flow(&mut self, state: Option<State>,client: &C) -> Result<bool, OAuth2Error> {
+        let state = if let Some(state) = Self::find_query_state() {
+            state
+        }else {
             // unable to get location and query
             return Ok(false);
         };
-        #[cfg(feature = "google")]
-        return Ok(true);
 
-
-        #[cfg(not(feature = "google"))]
         log::debug!("Found state: {:?}", state);
-        #[cfg(not(feature = "google"))]
         if let Some(error) = state.error {
             log::info!("Login error from server: {error}");
 
@@ -471,7 +466,6 @@ where
             return Err(OAuth2Error::LoginResult(error));
         }
 
-        #[cfg(not(feature = "google"))]
         if let Some(code) = state.code {
             // cleanup URL
             Self::cleanup_url();
@@ -514,6 +508,21 @@ where
             log::debug!("Neither an error nor a code. Continue without applying state.");
             Ok(false)
         }
+    }
+
+    /// When initializing, try to detect the state from the URL and session state.
+    ///
+    /// Returns `false` if there is no authentication state found and the result is final.
+    /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
+    async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
+        // Fixme
+        let client = self.client.clone();
+        let client = client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
+        
+        let query_state = Self::find_query_state();
+        
+        self.extract_state_from_flow(query_state, client).await
+
     }
 
     fn post_login_redirect(&self) -> Result<(), OAuth2Error> {
@@ -601,11 +610,10 @@ where
                 #[cfg(feature = "google")]
                 access_token: query.get("access_token").map(ToString::to_string),
                 #[cfg(feature = "google")]
-                refresh_token: query.get("refresh_token").map(ToString::to_string),
-                #[cfg(feature = "google")]
                 scope: query.get("scope").map(ToString::to_string),
                 #[cfg(feature = "google")]
                 expires_in: query.get("expires_in").map(|x| x.parse::<u64>().unwrap_or(0)),
+                refresh_token: query.get("refresh_token").map(ToString::to_string),
                 state: query.get("state").map(ToString::to_string),
                 error:  query.get("access_token").map(ToString::to_string),
             })

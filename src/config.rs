@@ -121,7 +121,7 @@ pub mod oauth2 {
         /// The authentication URL
         pub auth_url: String,
         /// The token exchange URL
-        //#[cfg(not(feature = "google"))]
+        #[cfg(not(feature = "google"))]
         pub token_url: String,
         /// The Optional client secret.
         //#[cfg(feature = "google")]
@@ -150,12 +150,14 @@ pub mod oauth2 {
         pub fn new(
             client_id: impl Into<String>,
             auth_url: impl Into<String>,
+            #[cfg(not(feature = "google"))]
             token_url: impl Into<String>,
             client_secret: impl Into<String>,
         ) -> Self {
             Self {
                 client_id: client_id.into(),
                 auth_url: auth_url.into(),
+                #[cfg(not(feature = "google"))]
                 token_url: token_url.into(),
                 client_secret: client_secret.into(),
             }
