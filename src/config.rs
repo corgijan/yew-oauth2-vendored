@@ -148,14 +148,12 @@ pub mod oauth2 {
             auth_url: impl Into<String>,
             #[cfg(not(feature = "google"))]
             token_url: impl Into<String>,
-            client_secret: impl Into<String>,
         ) -> Self {
             Self {
                 client_id: client_id.into(),
                 auth_url: auth_url.into(),
                 #[cfg(not(feature = "google"))]
                 token_url: token_url.into(),
-                client_secret: client_secret.into(),
             }
         }
     }

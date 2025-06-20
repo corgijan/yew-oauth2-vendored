@@ -52,13 +52,10 @@ impl Client for OAuth2Client {
         let oauth2::Config {
             client_id,
             auth_url,
-            #[cfg(not(feature = "google"))]
-            token_url,
-            client_secret,
         } = config;
         let client = BasicClient::new(
             ClientId::new(client_id),
-            Some(ClientSecret::new(client_secret)),
+            None,
             AuthUrl::new(auth_url)
                 .map_err(|err| OAuth2Error::Configuration(format!("invalid auth URL: {err}")))?,
             Some(
