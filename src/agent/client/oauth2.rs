@@ -36,8 +36,6 @@ impl OAuth2Client {
             expires: expires(result.expires_in()),
             #[cfg(feature = "openid")]
             claims: None,
-            #[cfg(feature = "google")]
-            client_secret: None,
         })
     }
 }

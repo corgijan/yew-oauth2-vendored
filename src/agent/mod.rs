@@ -434,7 +434,6 @@ where
                         access_token: state.access_token.unwrap().clone(), // Placeholder, will be filled by the result
                         refresh_token: state.refresh_token, // Placeholder, will be filled by the result
                         expires: state.expires_in, // Placeholder, will be filled by the result
-                        client_secret: None,
                     }
                 );
                 //self.state = context;
@@ -448,7 +447,7 @@ where
         #[cfg(feature = "google")]
         return Ok(true);
     }
-    
+
     #[cfg(not(feature = "google"))]
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
@@ -463,7 +462,6 @@ where
 
 
         log::debug!("Found state: {:?}", state);
-        #[cfg(not(feature = "google"))]
         if let Some(error) = state.error {
             log::info!("Login error from server: {error}");
 
@@ -474,7 +472,6 @@ where
             return Err(OAuth2Error::LoginResult(error));
         }
 
-        #[cfg(not(feature = "google"))]
         if let Some(code) = state.code {
             // cleanup URL
             Self::cleanup_url();
@@ -603,7 +600,6 @@ where
                 code: query.get("code").map(ToString::to_string),
                 #[cfg(feature = "google")]
                 access_token: query.get("access_token").map(ToString::to_string),
-                #[cfg(feature = "google")]
                 refresh_token: query.get("refresh_token").map(ToString::to_string),
                 #[cfg(feature = "google")]
                 scope: query.get("scope").map(ToString::to_string),

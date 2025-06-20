@@ -23,9 +23,6 @@ pub struct Authentication {
     /// OpenID claims
     #[cfg(feature = "openid")]
     pub claims: Option<Rc<Claims>>,
-    /// optional client secret for Google OAuth2
-    #[cfg(feature = "google")]
-    pub client_secret: Option<String>,
     /// Expiration timestamp in second
     pub expires: Option<u64>,
 }
