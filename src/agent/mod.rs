@@ -285,6 +285,7 @@ where
         }
     }
 
+
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
         gloo::console::log!(format!("update state: {:?}",state));
         #[cfg(not(feature = "google"))]
@@ -414,13 +415,13 @@ where
     ///
     /// Returns `false` if there is no authentication state found and the result is final.
     /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
+    #[cfg(feature = "google")]
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
+
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
         gloo::console::log!("detecting state");
 
         let state = if let Some(state) = Self::find_query_state() {
-            #[cfg(feature = "google")]
-            {
                 //log to console
                 gloo::console::log!(format!("Found state: {:?}", state));
                 if state.access_token.is_none() {
@@ -440,25 +441,27 @@ where
                 self.update_state(context.clone(),None);
                 Self::cleanup_url();
                 return Ok(true);
-                if let Some(error) = state.error {
-                    log::info!("Login error from server: {error}");
-
-                    // cleanup URL
-                    Self::cleanup_url();
-
-                    // error from the OAuth2 server
-                    return Err(OAuth2Error::LoginResult(error));
-                }
-            };
         } else {
             // unable to get location and query
             return Ok(false);
         };
         #[cfg(feature = "google")]
         return Ok(true);
+    }
+    
+    #[cfg(not(feature = "google"))]
+    async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
+        let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
+        gloo::console::log!("detecting state");
+
+        let state = if let Some(state) = Self::find_query_state() {
+            state
+        } else {
+            // unable to get location and query
+            return Ok(false);
+        };
 
 
-        #[cfg(not(feature = "google"))]
         log::debug!("Found state: {:?}", state);
         #[cfg(not(feature = "google"))]
         if let Some(error) = state.error {
