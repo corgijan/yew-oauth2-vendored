@@ -346,7 +346,6 @@ where
 
                 if matches!(self.state, OAuth2Context::NotInitialized) {
                     let detected = self.detect_state().await;
-                    gloo::console::log!(format!("Detected state: {:?}", detected));
                     match detected {
                         Ok(true) => {
                             if let Err(e) = self.post_login_redirect() {
@@ -409,11 +408,9 @@ where
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
 
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-        gloo::console::log!("detecting state");
 
         let state = if let Some(state) = Self::find_query_state() {
                 //log to console
-                gloo::console::log!(format!("Found state: {:?}", state));
                 if state.access_token.is_none() {
                     return Err(OAuth2Error::LoginResult(
                         format!("Missing access token in query: {:?}", state)
@@ -441,7 +438,6 @@ where
     #[cfg(not(feature = "google"))]
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-        gloo::console::log!("detecting state");
 
         let state = if let Some(state) = Self::find_query_state() {
             state
@@ -539,7 +535,6 @@ where
     }
 
     async fn refresh(&mut self) {
-        gloo::console::log!("REFRESHING TOKEN");
         let (client, session_state) =
             if let (Some(client), Some(session_state)) = (&self.client, &self.session_state) {
                 (client.clone(), session_state.clone())
@@ -583,8 +578,6 @@ where
             #[cfg(not(feature = "google"))]
             let query: HashMap<_, _> = url.query_pairs().collect();
 
-            gloo::console::log!(format!("Token: {:?}",query.get("access_token").map(ToString::to_string), ));
-
             Some(State {
                 #[cfg(not(feature = "google"))]
                 code: query.get("code").map(ToString::to_string),
@@ -626,7 +619,6 @@ where
     }
 
     fn start_login(&mut self, options: Option<LoginOptions>) -> Result<(), OAuth2Error> {
-        gloo::console::log!("Starting login");
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
         log!("client:");
         let config = self.config.as_ref().ok_or(OAuth2Error::NotInitialized)?;
