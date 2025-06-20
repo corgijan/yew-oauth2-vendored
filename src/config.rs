@@ -123,10 +123,6 @@ pub mod oauth2 {
         /// The token exchange URL
         #[cfg(not(feature = "google"))]
         pub token_url: String,
-        /// The Optional client secret.
-        //#[cfg(feature = "google")]
-        #[cfg(feature = "google")]
-        pub client_secret: String,
     }
 
     #[cfg(not(feature = "google"))]

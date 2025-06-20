@@ -37,7 +37,7 @@ openidconnect = { version = "3.0", optional = true }
 yew-nested-router = { version = "0.7.0", optional = true }
 
 [features]
-default = ["google"]
+default = []
 # Enable for OpenID Connect support
 openid = ["openidconnect"]
 # Enable for Google OAuth2 support
