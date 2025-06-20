@@ -289,9 +289,9 @@ where
         gloo::console::log!(format!("update state: {:?}",state));
         #[cfg(not(feature = "google"))]
         if let OAuth2Context::Authenticated(Authentication {
-            expires: Some(expires),
-            ..
-        }) = &state
+                                                expires: Some(expires),
+                                                ..
+                                            }) = &state
         {
             gloo::console::log!(format!("Token expires in: {expires} seconds"));
             let grace = self
@@ -410,126 +410,10 @@ where
         Ok((client, inner))
     }
 
-
-
-    #[cfg(feature = "google")]
-    #[cfg(feature = "test")]
-    async fn extract_state_from_flow(&mut self, state: Option<State>,client: &C) -> Result<bool, OAuth2Error> {
-            let state = if let Some(state) = Self::find_query_state() {
-            //log to console
-            gloo::console::log!(format!("Found state: {:?}", state));
-            if state.access_token.is_none() {
-                return Err(OAuth2Error::LoginResult(
-                    format!("Missing access token in query: {:?}", state)
-                ));
-            }
-            let context = OAuth2Context::Authenticated(
-                Authentication {
-                    access_token: state.access_token.unwrap().clone(), // Placeholder, will be filled by the result
-                    refresh_token: state.refresh_token, // Placeholder, will be filled by the result
-                    expires: state.expires_in, // Placeholder, will be filled by the result
-                    client_secret: None,
-                }
-            );
-            self.update_state(context.clone(),None);
-            Self::cleanup_url();
-            if let Some(error) = state.error {
-                gloo::console::log!(format!("Encountered ERROR: {:?}", error));
-                // cleanup URL
-                Self::cleanup_url();
-                // error from the OAuth2 server
-                return Err(OAuth2Error::LoginResult(error));
-            };
-                return Ok(true);
-            } else {
-                // unable to get location and query
-                return Ok(false);
-            };
-    }
-
-    #[cfg(not(feature = "google"))]
-    #[cfg(feature = "test")]
-    async fn extract_state_from_flow(&mut self, state: Option<State>,client: &C) -> Result<bool, OAuth2Error> {
-        let state = if let Some(state) = Self::find_query_state() {
-            state
-        }else {
-            // unable to get location and query
-            return Ok(false);
-        };
-
-        log::debug!("Found state: {:?}", state);
-        if let Some(error) = state.error {
-            log::info!("Login error from server: {error}");
-
-            // cleanup URL
-            Self::cleanup_url();
-
-            // error from the OAuth2 server
-            return Err(OAuth2Error::LoginResult(error));
-        }
-
-        if let Some(code) = state.code {
-            // cleanup URL
-            Self::cleanup_url();
-
-            match state.state {
-                None => {
-                    return Err(OAuth2Error::LoginResult(
-                        "Missing state from server".to_string(),
-                    ))
-                }
-                Some(state) => {
-                    let stored_state = get_from_store(STORAGE_KEY_CSRF_TOKEN)?;
-
-                    if state != stored_state {
-                        return Err(OAuth2Error::LoginResult("State mismatch".to_string()));
-                    }
-                }
-            }
-
-            let state: C::LoginState =
-                SessionStorage::get(STORAGE_KEY_LOGIN_STATE).map_err(|err| {
-                    OAuth2Error::Storage(format!("Failed to load login state: {err}"))
-                })?;
-
-            log::debug!("Login state: {state:?}");
-
-            let redirect_url = get_from_store(STORAGE_KEY_REDIRECT_URL)?;
-            log::debug!("Redirect URL: {redirect_url}");
-            let redirect_url = Url::parse(&redirect_url).map_err(|err| {
-                OAuth2Error::LoginResult(format!("Failed to parse redirect URL: {err}"))
-            })?;
-
-            let client = client.clone().set_redirect_uri(redirect_url);
-
-            let result = client.exchange_code(code, state).await;
-            self.update_state_from_result(result);
-
-            Ok(true)
-        } else {
-            log::debug!("Neither an error nor a code. Continue without applying state.");
-            Ok(false)
-        }
-    }
-
     /// When initializing, try to detect the state from the URL and session state.
     ///
     /// Returns `false` if there is no authentication state found and the result is final.
     /// Otherwise, it returns `true` and spawns a request for e.g. a code exchange.
-
-    #[cfg(feature = "test")]
-    async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
-        // Fixme
-        let client = self.client.clone();
-        let client = client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
-
-        let query_state = Self::find_query_state();
-
-        self.extract_state_from_flow(query_state, client).await
-
-    }
-
-    #[cfg(not(feature = "test"))]
     async fn detect_state(&mut self) -> Result<bool, OAuth2Error> {
         let client = self.client.as_ref().ok_or(OAuth2Error::NotInitialized)?;
         gloo::console::log!("detecting state");
@@ -681,9 +565,9 @@ where
             };
 
         if let OAuth2Context::Authenticated(Authentication {
-            refresh_token: Some(refresh_token),
-            ..
-        }) = &self.state
+                                                refresh_token: Some(refresh_token),
+                                                ..
+                                            }) = &self.state
         {
             log::debug!("Triggering refresh");
 
@@ -717,10 +601,11 @@ where
                 #[cfg(feature = "google")]
                 access_token: query.get("access_token").map(ToString::to_string),
                 #[cfg(feature = "google")]
+                refresh_token: query.get("refresh_token").map(ToString::to_string),
+                #[cfg(feature = "google")]
                 scope: query.get("scope").map(ToString::to_string),
                 #[cfg(feature = "google")]
                 expires_in: query.get("expires_in").map(|x| x.parse::<u64>().unwrap_or(0)),
-                refresh_token: query.get("refresh_token").map(ToString::to_string),
                 state: query.get("state").map(ToString::to_string),
                 error:  query.get("access_token").map(ToString::to_string),
             })
