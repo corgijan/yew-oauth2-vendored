@@ -288,7 +288,6 @@ where
 
     fn update_state(&mut self, state: OAuth2Context, session_state: Option<C::SessionState>) {
         gloo::console::log!(format!("update state: {:?}",state));
-        #[cfg(not(feature = "google"))]
         if let OAuth2Context::Authenticated(Authentication {
                                                 expires: Some(expires),
                                                 ..
@@ -312,9 +311,9 @@ where
             // get delta from now to expiration minus the grace period
             let exp: f64 = expires as f64;
             gloo::console::log!(format!("exp time: {} seconds", exp-grace.as_secs_f64()));
-            #[cfg(feature = "google")]
+            #[cfg(feature = "relative-timestamp")]
             let diff = exp - grace.as_secs_f64();
-            #[cfg(not(feature = "google"))]
+            #[cfg(not(feature = "relative-timestamp"))]
             let diff = exp - now -grace.as_secs_f64();
             gloo::console::log!(format!("Token diff: {} seconds", diff));
 
