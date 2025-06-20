@@ -274,6 +274,7 @@ where
             Msg::Configure(config) => self.configure(config).await,
             Msg::StartLogin(login) => {
                 if let Err(err) = self.start_login(login) {
+                    // FIXME: need to report this somehow
                     gloo::console::log!(format!("Error starting login: {:?}",err));
                 }
             }
@@ -309,11 +310,13 @@ where
             let diff = exp - grace.as_secs_f64();
             #[cfg(not(feature = "relative-timestamp"))]
             let diff = exp - now -grace.as_secs_f64();
+            gloo::console::log!(format!("Token diff: {} seconds", diff));
 
             let tx = self.tx.clone();
             if diff > 0f64 {
                 // while the API says millis is u32, internally it is i32
                 let millis = (diff * 1000f64).to_i32().unwrap_or(i32::MAX);
+                gloo::console::log!(format!("Starting timeout for: {}ms", millis));
                 self.timeout = Some(Timeout::new(millis as u32, move || {
                     let _ = tx.try_send(Msg::Refresh);
                 }));
@@ -324,6 +327,8 @@ where
         } else {
             self.timeout = None;
         }
+        gloo::console::log!(format!("State changed: {:?}", self.timeout));
+        gloo::console::log!("notify state");
         self.notify_state(state.clone());
 
         self.state = state;
